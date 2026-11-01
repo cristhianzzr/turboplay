@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Turbo Play</title>
+  <link rel="stylesheet" href="css/style.css">
+  <!-- APIs de Samsung (AVPlay). En la TV Tizen resuelve $WEBAPIS; en un navegador de PC simplemente no carga. -->
+  <script src="$WEBAPIS/webapis/webapis.js"></script>
+</head>
+<body>
+  <div id="app">
+
+    <!-- LOGIN -->
+    <section id="screen-login" class="screen">
+      <div class="login-wrap">
+        <svg class="login-logo" viewBox="0 0 520 230" role="img" aria-label="Turbo Play"><use href="#tp-logo" xlink:href="#tp-logo"/></svg>
+        <div class="login-form">
+          <input id="serverInput" class="input focusable" type="text" placeholder="URL del servidor (http://ejemplo.com:8080)" autocomplete="off" autocapitalize="off" spellcheck="false">
+          <input id="usernameInput" class="input focusable" type="text" placeholder="Usuario" autocomplete="off" autocapitalize="off" spellcheck="false">
+          <input id="passwordInput" class="input focusable" type="password" placeholder="Contrase&ntilde;a" autocomplete="off">
+          <button id="loginButton" class="btn-primary focusable" type="button">Entrar</button>
+          <div id="loginProgress" class="spinner small hidden"></div>
+          <p id="loginStatus" class="status-line"></p>
+          <p class="login-note">Para una lista M3U, pega su URL y deja usuario y contrase&ntilde;a vac&iacute;os.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- CANALES -->
+    <section id="screen-channels" class="screen hidden">
+      <header class="top-bar">
+        <svg class="mark" viewBox="0 0 96 64" aria-hidden="true"><use href="#tp-mark" xlink:href="#tp-mark"/></svg>
+        <div class="top-title">
+          <strong>TURBO PLAY</strong>
+          <span id="channelCountText">TV EN VIVO</span>
+        </div>
+        <button id="logoutButton" class="chip focusable" type="button">Cerrar sesi&oacute;n</button>
+      </header>
+      <div class="status-row">
+        <span id="statusText"></span>
+      </div>
+      <nav id="categoryList" class="categories"></nav>
+      <div class="grid-area">
+        <div id="channelGrid" class="channel-grid"></div>
+        <div id="loadingPanel" class="overlay hidden">
+          <div class="spinner"></div>
+          <p>Cargando canales&hellip;</p>
+        </div>
+        <p id="emptyText" class="empty hidden">No hay canales en esta categor&iacute;a.</p>
+      </div>
+    </section>
+
+    <!-- GUÍA -->
+    <section id="screen-guide" class="screen hidden">
+      <header class="guide-head">
+        <div>
+          <strong id="guideChannelName"></strong>
+          <span class="muted">Gu&iacute;a de programaci&oacute;n</span>
+        </div>
+      </header>
+      <div class="grid-area">
+        <div id="guideList" class="guide-list"></div>
+        <div id="guideLoading" class="overlay">
+          <div class="spinner"></div>
+          <p>Cargando gu&iacute;a&hellip;</p>
+        </div>
+        <p id="guideEmpty" class="empty hidden">Programaci&oacute;n no disponible para este canal.</p>
+      </div>
+    </section>
+
+    <!-- REPRODUCTOR -->
+    <section id="screen-player" class="screen hidden">
+      <object id="av-player" type="application/avplayer"></object>
+      <video id="video" autoplay playsinline></video>
+      <div id="playerLoading" class="panel player-loading hidden">
+        <div class="spinner"></div>
+        <p id="playerLoadingText">Abriendo canal&hellip;</p>
+      </div>
+      <div id="infoPanel" class="panel info-panel hidden">
+        <div id="playerLogoBox" class="logo-box player-logo"></div>
+        <div class="info-body">
+          <div class="info-row">
+            <strong id="playerChannelName"></strong>
+            <span id="playerGuideBadge" class="badge">GU&Iacute;A</span>
+          </div>
+          <div class="info-row">
+            <span id="playerEpgNow" class="epg-now"></span>
+            <span id="playerEpgTime" class="muted"></span>
+          </div>
+          <div id="playerEpgBar" class="progress"><i id="playerEpgFill"></i></div>
+          <span id="playerEpgNext" class="muted epg-next"></span>
+          <span id="playerHint" class="muted hint"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONFIRMAR CIERRE DE SESIÓN -->
+    <div id="confirmLogout" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+      <div class="panel modal-box">
+        <h2 id="confirmTitle">&iquest;Cerrar sesi&oacute;n?</h2>
+        <p class="muted">Tendr&aacute;s que ingresar de nuevo los datos del servidor.</p>
+        <div class="modal-actions">
+          <button id="logoutCancel" class="chip focusable" type="button">Cancelar</button>
+          <button id="logoutConfirm" class="btn-primary focusable" type="button">S&iacute;, cerrar sesi&oacute;n</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Marca vectorial de Turbo Play (aproximación: reemplázala por tu logo oficial cuando lo tengas) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <linearGradient id="tpg" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#3C8BFF"/><stop offset="1" stop-color="#6FE0FF"/>
+      </linearGradient>
+      <linearGradient id="tplogobg" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#2F86F2"/><stop offset="0.55" stop-color="#1F58DC"/><stop offset="1" stop-color="#1B3FC8"/>
+      </linearGradient>
+      <symbol id="tp-mark" viewBox="0 0 96 64">
+        <rect x="2" y="14" width="26" height="5" rx="2.5" fill="#7ADAFF"/>
+        <rect x="10" y="25" width="22" height="5" rx="2.5" fill="#7ADAFF"/>
+        <rect x="4" y="36" width="28" height="5" rx="2.5" fill="#7ADAFF"/>
+        <rect x="14" y="47" width="18" height="5" rx="2.5" fill="#7ADAFF"/>
+        <path d="M38 12 L38 52 L80 32 Z" fill="url(#tpg)" stroke="url(#tpg)" stroke-width="9" stroke-linejoin="round"/>
+        <path d="M57 18 L44 36 H53 L48 49 L66 28 H56 L61 18 Z" fill="#0F2A9C"/>
+      </symbol>
+      <symbol id="tp-logo" viewBox="0 0 520 230">
+        <rect x="0" y="0" width="520" height="230" rx="44" fill="url(#tplogobg)"/>
+        <use href="#tp-mark" xlink:href="#tp-mark" x="20" y="40" width="240" height="160"/>
+        <text x="268" y="112" font-family="Arial, Helvetica, sans-serif" font-size="78" font-weight="900" font-style="italic" fill="#FFFFFF">Turbo</text>
+        <text x="268" y="184" font-family="Arial, Helvetica, sans-serif" font-size="78" font-weight="900" font-style="italic" fill="url(#tpg)">Play</text>
+      </symbol>
+    </defs>
+  </svg>
+
+  <script src="js/config.js"></script>
+  <script src="js/channelGroups.js"></script>
+  <script src="js/inflate.js"></script>
+  <script src="js/xtream.js"></script>
+  <script src="js/logocache.js"></script>
+  <script src="js/epg.js"></script>
+  <script src="js/player.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
