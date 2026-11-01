@@ -136,6 +136,18 @@
       if (c) Store.save(c.server, c.username, c.password);
     }
   };
+  // Con servidor fijo, la sesión guardada siempre usa la dirección actual de config.js
+  // (si cambias el servidor, las TVs siguen conectadas con el mismo usuario).
+  (function () {
+    var fixed = (window.TP_CONFIG.FIXED_SERVER || "").trim();
+    if (!fixed) return;
+    var load = Store.load;
+    Store.load = function () {
+      var c = load();
+      if (c) c.server = X.normalizeServer(fixed, false);
+      return c;
+    };
+  })();
   setInterval(function () { Store.refresh(); }, 30000);
   window.addEventListener("pagehide", function () { Store.refresh(); });
 
@@ -275,11 +287,28 @@
     loginStatus.style.color = color || "";
   }
 
+  var FIXED_SERVER = (window.TP_CONFIG.FIXED_SERVER || "").trim();
+
+  // Con servidor fijo: se oculta el campo de dirección y la nota de M3U.
+  if (FIXED_SERVER) {
+    $("serverInput").classList.add("hidden");
+    var note = document.querySelector(".login-note");
+    if (note) note.classList.add("hidden");
+  }
+
+  function firstLoginField() { return FIXED_SERVER ? $("usernameInput") : $("serverInput"); }
+
   loginBtn.addEventListener("click", function () {
-    var rawServer = $("serverInput").value;
+    var rawServer = FIXED_SERVER || $("serverInput").value;
     var user = $("usernameInput").value.trim();
     var pass = $("passwordInput").value;
     var ERR = "#FF7A7A";
+
+    if (FIXED_SERVER && (!user || !pass)) {
+      setLoginStatus("Escribe tu usuario y contraseña.", ERR);
+      (user ? $("passwordInput") : $("usernameInput")).focus();
+      return;
+    }
 
     if (!rawServer.trim()) {
       setLoginStatus("Escribe la URL del servidor.", ERR);
@@ -311,7 +340,7 @@
         openChannels();
       } else {
         setLoginStatus(result.message, ERR);
-        (m3u ? $("serverInput") : $("passwordInput")).focus();
+        (m3u ? firstLoginField() : $("passwordInput")).focus();
       }
     });
   });
@@ -320,7 +349,7 @@
     show("login");
     $("passwordInput").value = "";
     setLoginStatus("");
-    $("serverInput").focus();
+    firstLoginField().focus();
   }
 
   /* ====================================================================

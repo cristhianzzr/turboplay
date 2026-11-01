@@ -3,6 +3,10 @@
  * La dirección del servidor, el usuario y la contraseña se escriben en la pantalla de inicio.
  */
 window.TP_CONFIG = {
+  // Servidor Xtream fijo. Si tiene una dirección, la app NO la pide: solo usuario y contraseña.
+  // Déjalo vacío ("") para volver a pedir la dirección del servidor (o una lista M3U).
+  FIXED_SERVER: "http://213.186.32.5:25461",
+
   // Formato de los canales en vivo (cuando el servidor es Xtream):
   //   "m3u8" -> HLS (recomendado). En Samsung, AVPlay también reproduce "ts" sin problemas.
   //   "ts"   -> MPEG-TS directo.
